@@ -1,0 +1,150 @@
+-- Load Rayfield
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+-- Services
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- Window
+local Window = Rayfield:CreateWindow({
+	Name = "ESP & Player Tools",
+	LoadingTitle = "Rayfield Hub",
+	LoadingSubtitle = "ESP + Movement",
+	ConfigurationSaving = { Enabled = false }
+})
+
+-- Tab
+local Tab = Window:CreateTab("Main", 4483362458)
+
+--------------------------------------------------
+-- ESP FUNCTION
+--------------------------------------------------
+local function ModelESP(modelName, espName, color)
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Model") and obj.Name == modelName then
+			if not obj:FindFirstChild(espName) then
+				local h = Instance.new("Highlight")
+				h.Name = espName
+				h.Parent = obj
+				h.FillColor = color
+				h.OutlineColor = Color3.fromRGB(255,255,255)
+				h.FillTransparency = 0.5
+			end
+		end
+	end
+end
+
+--------------------------------------------------
+-- ESP BUTTONS
+--------------------------------------------------
+Tab:CreateButton({
+	Name = "Giftbox ESP",
+	Callback = function()
+		ModelESP("Giftbox", "GiftboxESP", Color3.fromRGB(255,0,0))
+	end
+})
+
+Tab:CreateButton({
+	Name = "Krampus ESP",
+	Callback = function()
+		ModelESP("Krampus", "KrampusESP", Color3.fromRGB(0,170,255))
+	end
+})
+
+--------------------------------------------------
+-- SPEED
+--------------------------------------------------
+Tab:CreateButton({
+	Name = "Speed (50)",
+	Callback = function()
+		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum.WalkSpeed = 50
+		end
+	end
+})
+
+--------------------------------------------------
+-- INFINITE JUMP
+--------------------------------------------------
+local InfiniteJumpEnabled = false
+
+Tab:CreateButton({
+	Name = "Infinite Jump",
+	Callback = function()
+		if InfiniteJumpEnabled then return end
+		InfiniteJumpEnabled = true
+
+		UIS.JumpRequest:Connect(function()
+			local char = LocalPlayer.Character
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end)
+	end
+})
+
+--------------------------------------------------
+-- TELEPORT TO ALL GIFTBOXES
+--------------------------------------------------
+Tab:CreateButton({
+	Name = "Teleport to Giftboxes",
+	Callback = function()
+		local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		local hrp = char:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+
+		for _, obj in ipairs(workspace:GetDescendants()) do
+			if obj:IsA("Model") and obj.Name == "Giftbox" then
+				local part = obj:FindFirstChildWhichIsA("BasePart")
+				if part then
+					hrp.CFrame = part.CFrame + Vector3.new(0, 3, 0)
+					task.wait(0.6)
+				end
+			end
+		end
+	end
+})
+
+--------------------------------------------------
+-- NOCLIP
+--------------------------------------------------
+local NoclipEnabled = false
+
+Tab:CreateButton({
+	Name = "Noclip",
+	Callback = function()
+		if NoclipEnabled then return end
+		NoclipEnabled = true
+
+		RunService.Stepped:Connect(function()
+			if NoclipEnabled then
+				local char = LocalPlayer.Character
+				if char then
+					for _, v in pairs(char:GetDescendants()) do
+						if v:IsA("BasePart") then
+							v.CanCollide = false
+						end
+					end
+				end
+			end
+		end)
+	end
+})
+
+--------------------------------------------------
+-- NO FOG
+--------------------------------------------------
+Tab:CreateButton({
+	Name = "No Fog",
+	Callback = function()
+		Lighting.FogEnd = 1e9
+		Lighting.FogStart = 0
+	end
+})
